@@ -1,31 +1,32 @@
 import streamlit as st
 import speech_recognition as sr
 from googletrans import Translator
-import tempfile  # For saving audio files temporarily
+from audio_recorder_streamlit import audio_recorder
+import tempfile
 import os
 
 def speech_to_text_with_arabic_translation():
     """
-    Captures speech from uploaded audio, converts it to text, and translates it to Arabic.
-    This version avoids microphone access and uses file uploads for better cloud compatibility.
+    Captures speech from recorded audio, converts it to text, and translates it to Arabic.
+    Uses audio-recorder-streamlit for audio capture.
     """
     translator = Translator()
 
-    st.title("Audio to Arabic Text Translation")
+    st.title("Recorded Audio to Arabic Text Translation")
 
-    uploaded_file = st.file_uploader("Upload an audio file (WAV)", type=["wav"])
+    audio_bytes = audio_recorder()
 
-    if uploaded_file is not None:
+    if audio_bytes:
         try:
-            # Save the uploaded file to a temporary location
+            # Save the recorded audio to a temporary WAV file
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio:
-                temp_audio.write(uploaded_file.read())
+                temp_audio.write(audio_bytes)
                 temp_audio_path = temp_audio.name
 
             recognizer = sr.Recognizer()
 
             with sr.AudioFile(temp_audio_path) as source:
-                audio_data = recognizer.record(source)  # Record the entire file
+                audio_data = recognizer.record(source)
                 text = recognizer.recognize_google(audio_data)
 
             st.write(f"Recognized Text: {text}")
